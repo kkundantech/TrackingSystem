@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiTrack - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .dashboard-container {
+            width: 100%;
+            margin: 0;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+            width: 100%;
+        }
+
+        .welcome-message {
+            font-size: 1.5rem;
+            color: #000;
+        }
+
+        .account-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .account-btn {
+            background-color: #000;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .account-btn:hover {
+            background-color: #333;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-weight: 500;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown-content a.logout-option {
+            color: #ff4444;
+        }
+
+        .show {
+            display: block;
+        }
+
+        .logout-btn {
+            background-color: #ff4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .logout-btn:hover {
+            background-color: #cc0000;
+        }
+
+        .dashboard-content {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #000;
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+
+        .stat-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-title {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #000;
+        }
+
+        .dashboard-actions {
+            margin-top: 2rem;
+            width: 100%;
+        }
+
+        .action-btn {
+            display: inline-block;
+            background-color: #000;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-right: 1rem;
+            font-weight: 600;
+        }
+
+        .action-btn:hover {
+            background-color: #333;
+        }
+
+        .search-container {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .toggle-btn.active {
+            background-color: #000;
+            color: white;
+            border-color: #000;
+        }
+
+        .search-input-container {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .search-btn {
+            padding: 0.75rem 1.5rem;
+            background-color: #000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .search-btn:hover {
+            background-color: #333;
+        }
+
+        .error-message {
+            color: #ff4444;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 95%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .close-modal {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1.25rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            border-color: #000;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .modal-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1rem;
+        }
+
+        .cancel-btn {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .cancel-btn:hover {
+            background-color: #e0e0e0;
+        }
+
+        .save-btn {
+            background-color: #000;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background-color: #333;
+        }
+
+        .success-message {
+            color: #4CAF50;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .form-group input[readonly] {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        /* Add loading bar styles */
+        .loading-bar-container {
+            display: none;
+            width: 100%;
+            height: 4px;
+            background-color: #f0f0f0;
+            margin-top: 1rem;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .loading-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #000;
+            transition: width 0.3s ease;
+        }
+
+        .search-status {
+            display: none;
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .recent-activity {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .recent-activity h2 {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            transition: transform 0.2s ease;
+        }
+
+        .activity-item:hover {
+            transform: translateX(5px);
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-id {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .activity-type {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .activity-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-processing {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-delivered {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div class="welcome-message">Welcome, <span id="user-name"></span>!</div>
+            <div class="account-container">
+                <div class="account-btn" id="account-btn">
+                    <i class="fas fa-user"></i> Account
+                </div>
+                <div class="dropdown-content" id="accountDropdown">
+                    <a href="#" onclick="openPasswordModal()">Change Password</a>
+                    <a href="history.html">History</a>
+                    <a href="#" onclick="logout()" class="logout-option">Logout</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <h1 class="dashboard-title">Dashboard</h1>
+
+            <div class="search-container">
+                <div class="search-toggle">
+                    <button class="toggle-btn active" data-type="order">Order ID</button>
+                    <button class="toggle-btn" data-type="tracking">Tracking ID</button>
+                </div>
+                <div class="search-input-container">
+                    <input type="text" id="search-input" class="search-input" placeholder="Enter Order ID">
+                    <button onclick="handleSearch()" class="search-btn">Search</button>
+                </div>
+                <div class="loading-bar-container" id="loading-bar-container">
+                    <div class="loading-bar" id="loading-bar"></div>
+                </div>
+                <div class="search-status" id="search-status"></div>
+            </div>
+            <div class="error-message" id="search-error">Please enter a valid ID</div>
+
+            <div class="recent-activity">
+                <h2>Recent Activity</h2>
+                <div class="activity-list" id="activity-list">
+                    <!-- Activity items will be populated here -->
+                </div>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-title">Processing</div>
+                    <div class="stat-value" id="processing-count">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Delivered</div>
+                    <div class="stat-value" id="delivered-count">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Total Orders</div>
+                    <div class="stat-value" id="total-orders">0</div>
+                </div>
+            </div>
+
+            <div class="dashboard-actions">
+                <a href="history.html" class="action-btn">History</a>
+                <a href="#" class="action-btn">View All Shipments</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Change Password</h2>
+                <span class="close-modal" id="close-modal">&times;</span>
+            </div>
+            <form id="password-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="current-password">Current Password</label>
+                    <input type="password" id="current-password" required>
+                    <div class="error-message" id="current-password-error">Incorrect password</div>
+                </div>
+                <div class="form-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" required>
+                    <div class="error-message" id="password-mismatch-error">Passwords do not match</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="modal-btn cancel-btn" id="cancel-btn">Cancel</button>
+                    <button type="submit" class="modal-btn save-btn">Save Changes</button>
+                </div>
+            </form>
+            <div class="success-message" id="password-success">Password changed successfully!</div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="pages/contact.html">Contact Us</a>
+                <a href="pages/about.html">About Us</a>
+                <a href="pages/policies.html">Policies</a>
+                <a href="pages/suggestions.html">Suggestions</a>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 LogiTrack. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="shared-data.js"></script>
+    <script>
+        // Move updateDashboardStats function outside DOMContentLoaded
+        function updateDashboardStats() {
+            const processingCount = parseInt(localStorage.getItem('processingCount') || '0');
+            const deliveredCount = parseInt(localStorage.getItem('deliveredCount') || '0');
+            const totalOrders = processingCount + deliveredCount;
+
+            document.getElementById('processing-count').textContent = processingCount;
+            document.getElementById('delivered-count').textContent = deliveredCount;
+            document.getElementById('total-orders').textContent = totalOrders;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize toggle buttons and search functionality
+            initializeSearch();
+
+            // Check if user is logged in
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                window.location.href = 'index.html';
+            } else {
+                // Display user name
+                const username = sessionStorage.getItem('username');
+                const userEmail = sessionStorage.getItem('userEmail');
+                document.getElementById('user-name').textContent = username || 'User';
+
+                // Set username and email in the password change form
+                document.getElementById('username').value = username || '';
+                document.getElementById('email').value = userEmail || '';
+            }
+
+            // Update dashboard statistics
+            updateDashboardStats();
+
+            // Update statistics every time the dashboard is viewed
+            window.addEventListener('focus', updateDashboardStats);
+
+            // Handle account dropdown
+            const accountBtn = document.getElementById('account-btn');
+            const accountDropdown = document.getElementById('accountDropdown');
+
+            accountBtn.addEventListener('click', function () {
+                accountDropdown.classList.toggle('show');
+            });
+
+            // Close the dropdown if the user clicks outside of it
+            window.addEventListener('click', function (event) {
+                if (!event.target.matches('.account-btn') && !event.target.matches('.account-btn *')) {
+                    if (accountDropdown.classList.contains('show')) {
+                        accountDropdown.classList.remove('show');
+                    }
+                }
+            });
+        });
+
+        function initializeSearch() {
+            const toggleBtns = document.querySelectorAll('.toggle-btn');
+            const searchInput = document.getElementById('search-input');
+            const searchError = document.getElementById('search-error');
+
+            // Set initial state
+            updatePlaceholder(document.querySelector('.toggle-btn.active').dataset.type);
+
+            // Handle toggle button clicks
+            toggleBtns.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    toggleBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    updatePlaceholder(this.dataset.type);
+                    searchError.style.display = 'none'; // Clear any error messages
+                });
+            });
+
+            // Handle search button click
+            document.querySelector('.search-btn').addEventListener('click', handleSearch);
+
+            // Handle Enter key press
+            searchInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSearch();
+                }
+            });
+        }
+
+        function updatePlaceholder(searchType) {
+            const searchInput = document.getElementById('search-input');
+            searchInput.placeholder = searchType === 'order' ? 'Enter Order ID (e.g., 404-4356617-4379543)' : 'Enter Tracking ID (e.g., TRK-123456)';
+            searchInput.value = ''; // Clear input when switching types
+        }
+
+        function handleSearch() {
+            const searchInput = document.getElementById('search-input');
+            const searchValue = searchInput.value.trim();
+            const searchType = document.querySelector('.toggle-btn.active').dataset.type;
+            const searchError = document.getElementById('search-error');
+            const searchBtn = document.querySelector('.search-btn');
+            const loadingBarContainer = document.getElementById('loading-bar-container');
+            const searchStatus = document.getElementById('search-status');
+
+            // Reset states
+            loadingBarContainer.style.display = 'none';
+            searchStatus.style.display = 'none';
+            document.getElementById('loading-bar').style.width = '0%';
+            searchError.style.display = 'none';
+
+            if (!searchValue) {
+                searchError.style.display = 'block';
+                searchError.textContent = `Please enter ${searchType === 'order' ? 'an Order' : 'a Tracking'} ID`;
+                setTimeout(() => {
+                    searchError.style.display = 'none';
+                }, 3000);
+                return;
+            }
+
+            // Get mock orders from shared data
+            const mockOrders = LogiTrackShared.getMockOrders();
+
+            // Check if order exists
+            const orderExists = searchType === 'order' ?
+                mockOrders['order'][searchValue] :
+                mockOrders['tracking'][searchValue];
+
+            if (!orderExists) {
+                hideLoadingState();
+                showError('No ' + searchType + ' found with ID: ' + searchValue);
+                return;
+            }
+
+            // Get shipment details
+            const shipmentDetails = LogiTrackShared.getShipmentDetails(searchValue, searchType);
+
+            // Save to global search history
+            LogiTrackShared.saveToGlobalSearchHistory({
+                searchType: searchType,
+                searchValue: searchValue,
+                timestamp: new Date().toISOString(),
+                orderDetails: shipmentDetails
+            });
+
+            // Update counters
+            updateCounters(shipmentDetails.status);
+
+            // Redirect to shipment details page
+            setTimeout(() => {
+                window.location.href = `shipment-details.html?id=${searchValue}&type=${searchType}`;
+            }, 1000);
+
+            updateRecentActivity();
+        }
+
+        function showLoadingState() {
+            const loadingBar = document.getElementById('loading-bar');
+            const loadingBarContainer = document.getElementById('loading-bar-container');
+            const searchStatus = document.getElementById('search-status');
+
+            loadingBarContainer.style.display = 'block';
+            searchStatus.style.display = 'block';
+
+            const states = [
+                { text: 'Validating...', time: 500, progress: 25 },
+                { text: `Processing ${searchType === 'order' ? 'Order' : 'Tracking'} ID...`, time: 600, progress: 50 },
+                { text: 'Searching...', time: 700, progress: 75 },
+                { text: 'Redirecting...', time: 500, progress: 100 }
+            ];
+
+            return states.reduce((promise, state) => {
+                return promise.then(() => {
+                    return new Promise(resolve => {
+                        button.textContent = state.text;
+                        searchStatus.textContent = state.text;
+                        loadingBar.style.width = `${state.progress}%`;
+                        setTimeout(resolve, state.time);
+                    });
+                });
+            }, Promise.resolve());
+        }
+
+        function hideLoadingState() {
+            const loadingBarContainer = document.getElementById('loading-bar-container');
+            const searchStatus = document.getElementById('search-status');
+
+            loadingBarContainer.style.display = 'none';
+            searchStatus.style.display = 'none';
+        }
+
+        function showError(message) {
+            const searchError = document.getElementById('search-error');
+            searchError.style.display = 'block';
+            searchError.textContent = message;
+            setTimeout(() => {
+                searchError.style.display = 'none';
+            }, 3000);
+        }
+
+        function updateCounters(status) {
+            let processingCount = parseInt(localStorage.getItem('processingCount') || '0');
+            let deliveredCount = parseInt(localStorage.getItem('deliveredCount') || '0');
+
+            if (status === 'processing') {
+                processingCount++;
+                localStorage.setItem('processingCount', processingCount.toString());
+            } else if (status === 'delivered') {
+                deliveredCount++;
+                localStorage.setItem('deliveredCount', deliveredCount.toString());
+            }
+
+            updateDashboardStats();
+        }
+
+        function updateRecentActivity() {
+            const activityList = document.getElementById('activity-list');
+            const searchHistory = JSON.parse(localStorage.getItem('globalSearchHistory') || '[]');
+
+            if (searchHistory.length === 0) {
+                activityList.innerHTML = '<div class="activity-item">No recent activity</div>';
+                return;
+            }
+
+            const activityHTML = searchHistory.slice(0, 5).map(item => {
+                const searchDate = new Date(item.searchDate);
+                const formattedDate = searchDate.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `
+                    <div class="activity-item">
+                        <div class="activity-info">
+                            <div class="activity-id">${item.id}</div>
+                            <div class="activity-type">${item.trackingId ? 'Tracking ID: ' + item.trackingId : 'Order ID'}</div>
+                            <div class="activity-time">${formattedDate}</div>
+                        </div>
+                        <div class="activity-status status-${item.status}">${item.status}</div>
+                    </div>
+                `;
+            }).join('');
+
+            activityList.innerHTML = activityHTML;
+        }
+
+        // Update recent activity when page loads and after each search
+        document.addEventListener('DOMContentLoaded', function () {
+            updateRecentActivity();
+        });
+
+        // Add logout function
+        function logout() {
+            // Clear session storage
+            sessionStorage.removeItem('isLoggedIn');
+            sessionStorage.removeItem('username');
+            sessionStorage.removeItem('userEmail');
+
+            // Clear any other user-specific data if needed
+            localStorage.removeItem('processingCount');
+            localStorage.removeItem('deliveredCount');
+
+            // Redirect to login page
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

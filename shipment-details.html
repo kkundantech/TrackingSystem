@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipment Details - LogiTrack</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .shipment-details-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .shipment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-id {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .info-section {
+            margin-bottom: 2rem;
+        }
+
+        .info-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .shipment-item {
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .status.processing {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.delivered {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .back-button:hover {
+            background: #0056b3;
+        }
+
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            padding: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="dashboard.html" class="back-button">← Back to Dashboard</a>
+        <div id="shipment-details-container" class="shipment-details-container">
+            <!-- Shipment details will be populated here -->
+        </div>
+    </div>
+
+    <script src="shared-data.js"></script>
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchId = urlParams.get('id');
+        const searchType = urlParams.get('type');
+
+        // Get shipment details from shared data
+        const shipmentDetails = LogiTrackShared.getShipmentDetails(searchId, searchType);
+
+        // Display shipment details
+        function displayShipmentDetails() {
+            const container = document.getElementById('shipment-details-container');
+
+            if (!shipmentDetails) {
+                container.innerHTML = '<div class="error-message">No shipment details found</div>';
+                return;
+            }
+
+            // Format order date
+            const orderDate = new Date(shipmentDetails.order_date);
+            const formattedDate = orderDate.toLocaleDateString('en-US', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+
+            // Generate HTML content
+            const html = `
+            <div class="shipment-header">
+                <h2>Order Details</h2>
+                <div class="order-id">Order ID: ${searchId}</div>
+            </div>
+            
+            <div class="shipment-info">
+                <div class="info-section">
+                    <h3>Order Summary</h3>
+                    <p>Order Date: ${formattedDate}</p>
+                    <p>Total Amount: ₹${shipmentDetails.total_amount.toFixed(2)}</p>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Shipping Address</h3>
+                    <p>${shipmentDetails.customer.name}</p>
+                    <p>${shipmentDetails.customer.address}</p>
+                    <p>${shipmentDetails.customer.city}, ${shipmentDetails.customer.state} ${shipmentDetails.customer.postal_code}</p>
+                    <p>Phone: ${shipmentDetails.customer.phone}</p>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Shipment List</h3>
+                    ${shipmentDetails.shipments.map(shipment => `
+                        <div class="shipment-item">
+                            <p>Shipment ${shipment.number} of ${shipment.total_shipments}</p>
+                            <p>Tracking ID: ${shipment.tracking_id}</p>
+                            <p>Amount: ₹${shipment.amount.toFixed(2)}</p>
+                            <p>Items: ${shipment.items_count}</p>
+                            <p>Status: <span class="status ${shipment.status}">${shipment.status}</span></p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+            container.innerHTML = html;
+        }
+
+        // Call display function when page loads
+        document.addEventListener('DOMContentLoaded', displayShipmentDetails);
+    </script>
+</body>
+
+</html>

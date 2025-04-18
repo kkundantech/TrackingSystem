@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiTrack - Shipment History</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0;
+            padding-top: 3rem;
+            padding-left: 2rem;
+            padding-right: 2rem;
+            padding-bottom: 2rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .header {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 0.5rem 2rem;
+            border-bottom: 1px solid #ddd;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #f5f5f5;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .shipment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding-top: 1rem;
+        }
+
+        .shipment-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .shipment-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        .order-id {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .status-processing {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .status-delivered {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .order-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-section {
+            margin-bottom: 1rem;
+        }
+
+        .detail-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            color: #000;
+            font-weight: 500;
+        }
+
+        .address-section {
+            grid-column: 1 / -1;
+            border-top: 1px solid #eee;
+            padding-top: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .no-shipments {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .no-shipments i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ddd;
+        }
+
+        .no-shipments h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-shipments p {
+            margin-bottom: 1.5rem;
+        }
+
+        .search-again-btn {
+            display: inline-block;
+            background-color: #000;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .search-again-btn:hover {
+            background-color: #333;
+        }
+
+        .tracking-id {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .search-date {
+            color: #999;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <div class="shipment-list" id="shipment-list">
+            <!-- Shipments will be inserted here -->
+        </div>
+
+        <div class="no-shipments" id="no-shipments" style="display: none;">
+            <i class="fas fa-box-open"></i>
+            <h2>No Shipment History</h2>
+            <p>Your shipment history will appear here once you track shipments.</p>
+            <a href="dashboard.html" class="search-again-btn">Search Shipments</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check if user is logged in
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            displayShipments();
+        });
+
+        function displayShipments() {
+            const searchHistory = JSON.parse(localStorage.getItem('globalSearchHistory') || '[]');
+            const shipmentList = document.getElementById('shipment-list');
+            const noShipments = document.getElementById('no-shipments');
+
+            if (searchHistory.length === 0) {
+                noShipments.style.display = 'block';
+                shipmentList.style.display = 'none';
+                return;
+            }
+
+            noShipments.style.display = 'none';
+            shipmentList.style.display = 'block';
+            shipmentList.innerHTML = '';
+
+            searchHistory.forEach(shipment => {
+                const shipmentItem = document.createElement('div');
+                shipmentItem.className = 'shipment-item';
+                shipmentItem.onclick = () => {
+                    window.location.href = `shipment-details.html?id=${shipment.searchValue}&type=${shipment.searchType}&status=${shipment.orderDetails.status}`;
+                };
+
+                const searchDate = new Date(shipment.timestamp);
+                const formattedDate = searchDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                shipmentItem.innerHTML = `
+                    <div class="order-header">
+                        <div class="order-id">Order #${shipment.searchValue}</div>
+                        <div class="status-badge status-${shipment.orderDetails.status}">
+                            ${shipment.orderDetails.status.charAt(0).toUpperCase() + shipment.orderDetails.status.slice(1)}
+                        </div>
+                    </div>
+                    <div class="order-details">
+                        <div class="detail-section">
+                            <div class="detail-label">Order Placed</div>
+                            <div class="detail-value">${shipment.orderDetails.order_date || 'N/A'}</div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">Total Amount</div>
+                            <div class="detail-value">₹${shipment.orderDetails.total_amount || '0.00'}</div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">Tracking ID</div>
+                            <div class="detail-value">${shipment.orderDetails.shipments?.[0]?.tracking_id || 'N/A'}</div>
+                        </div>
+                        <div class="address-section">
+                            <div class="detail-label">Shipping Address</div>
+                            <div class="detail-value">
+                                ${shipment.orderDetails.customer?.name || 'N/A'}<br>
+                                ${shipment.orderDetails.customer?.address || 'N/A'}<br>
+                                ${shipment.orderDetails.customer?.city || 'N/A'}, ${shipment.orderDetails.customer?.state || 'N/A'} ${shipment.orderDetails.customer?.postal_code || 'N/A'}<br>
+                                India
+                            </div>
+                        </div>
+                        <div class="search-date">
+                            Searched on: ${formattedDate}
+                        </div>
+                    </div>
+                `;
+
+                shipmentList.appendChild(shipmentItem);
+            });
+        }
+    </script>
+</body>
+
+</html>
